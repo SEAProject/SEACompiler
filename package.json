@@ -19,5 +19,8 @@
   "bugs": {
     "url": "https://github.com/SEAProject/SEACompiler/issues"
   },
-  "homepage": "https://github.com/SEAProject/SEACompiler#readme"
+  "homepage": "https://github.com/SEAProject/SEACompiler#readme",
+  "dependencies": {
+    "sealang": "^1.0.0"
+  }
 }

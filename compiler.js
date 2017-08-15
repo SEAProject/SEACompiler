@@ -5,7 +5,7 @@ const { promisify } = require('util');
 const { extname }   = require('path');
 
 // SEA Lang schema API
-const sea = require('../Schema/schema.js');
+const sea = require('sealang');
 
 // Async Node core method!
 const readFileAsynchronous = promisify(readFile);
