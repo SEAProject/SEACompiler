@@ -1,0 +1,23 @@
+{
+  "name": "compiler",
+  "version": "1.0.0",
+  "description": "SEA Compiler",
+  "main": "test.js",
+  "scripts": {
+    "start": "node test.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SEAProject/SEACompiler.git"
+  },
+  "keywords": [
+    "SEALang"
+  ],
+  "author": "fraxken",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/SEAProject/SEACompiler/issues"
+  },
+  "homepage": "https://github.com/SEAProject/SEACompiler#readme"
+}

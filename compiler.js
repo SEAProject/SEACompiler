@@ -5,7 +5,7 @@ const { promisify } = require('util');
 const { extname }   = require('path');
 
 // SEA Lang schema API
-const sea = require('../schema/core.js');
+const sea = require('../Schema/schema.js');
 
 // Async Node core method!
 const readFileAsynchronous = promisify(readFile);
@@ -37,7 +37,7 @@ class Compiler extends events {
             console.log('Line '+i);
             console.log(v);
             console.log('---------');
-        })
+        });
     }
 
 }
