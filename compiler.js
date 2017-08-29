@@ -2,42 +2,82 @@
 const events        = require('events');
 const { readFile }  = require('fs');
 const { promisify } = require('util');
-const { extname }   = require('path');
+const { extname, join }   = require('path');
+const chalk = require('chalk');
 
 // SEA Lang schema API
-const sea = require('sealang');
+const {File} = require('sealang');
 
 // Async Node core method!
 const readFileAsynchronous = promisify(readFile);
 
+const Patterns = [
+    join ( __dirname , 'patterns/string.js' )
+];
+
 /*
- * Compiler main class!
+ * @class Compiler @extend events
+ * @property {String} source
  */
 class Compiler extends events {
 
+    /*
+     * @constructor 
+     * @param {String} source
+     */
     constructor(source) {
         super();
         if("undefined" === typeof(source)) {
             throw new Error('Please defined a source destination!');
         }
         this.source = source;
+        this.patterns = new Set();
+        console.log('Loading all patterns...');
+        Patterns.forEach( localPath => {
+            console.log(`Loading ${localPath}`);
+            const classInstance = require(localPath);
+            this.patterns.add(classInstance);
+        });
     }
 
-    async transpile() {
-        try {
-            const buf = await readFileAsynchronous(this.source);
-            var strUTF = buf.toString();
-        }
-        catch(E) {
+    /*
+     * @function Compiler.transpile
+     * @param {String} fileSourceName
+     * @return Promise<void 0>
+     */
+    async transpile(fileSourceName = 'test') {
+        const buf = await readFileAsynchronous(this.source).catch( E => {
             console.error(E);
-        }
+        });
+
+        const transpiledCode = new File({
+            name: fileSourceName,
+            isModule: false
+        });
+        transpiledCode.breakline();
+        const variablesRegistery = new Set();
         
-        const lines = strUTF.split('\n');
-        lines.forEach( (v,i) => {
-            console.log('Line '+i);
-            console.log(v);
+        console.log('---------');
+        const lines = buf.toString().split('\n');
+        lines.forEach( (lineValue) => {
+            if(lineValue === '\n') {
+                transpiledCode.breakline();
+                return;
+            }
+            console.log(chalk.bold.yellow(lineValue));
+            for(let element of this.patterns) {
+                const ret = element.isMatching(lineValue);
+                console.log(`Check ${chalk.cyan.bold(element.name)} :: ${ret === true ? chalk.green.bold(ret.toString()) : chalk.red.bold(ret.toString())}`);
+                if(ret === true) {
+                    const _v = new element(lineValue);
+                    //variablesRegistery.add(_v);
+                    transpiledCode.add(_v.seaElement);
+                }
+            }
             console.log('---------');
         });
+
+        await transpiledCode.write( join( __dirname, 'compiled' ) );
     }
 
 }
