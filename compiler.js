@@ -12,7 +12,8 @@ const {File} = require('sealang');
 const readFileAsynchronous = promisify(readFile);
 
 const Patterns = [
-    join ( __dirname , 'patterns/string.js' )
+    join ( __dirname , 'patterns/string.js' ),
+    join ( __dirname , 'patterns/int.js' )
 ];
 
 /*
@@ -35,8 +36,14 @@ class Compiler extends events {
         console.log('Loading all patterns...');
         Patterns.forEach( localPath => {
             console.log(`Loading ${localPath}`);
-            const classInstance = require(localPath);
-            this.patterns.add(classInstance);
+            try {
+                const classInstance = require(localPath);
+                this.patterns.add(classInstance);
+            }
+            catch(E) {
+                console.log(`Failed to load ...`);
+                console.error(E);
+            }
         });
     }
 
@@ -66,12 +73,19 @@ class Compiler extends events {
             }
             console.log(chalk.bold.yellow(lineValue));
             for(let element of this.patterns) {
-                const ret = element.isMatching(lineValue);
-                console.log(`Check ${chalk.cyan.bold(element.name)} :: ${ret === true ? chalk.green.bold(ret.toString()) : chalk.red.bold(ret.toString())}`);
-                if(ret === true) {
-                    const _v = new element(lineValue);
-                    //variablesRegistery.add(_v);
-                    transpiledCode.add(_v.seaElement);
+                try {
+                    const ret = element.isMatching(lineValue);
+                    console.log(`Check ${chalk.cyan.bold(element.name)} :: ${ret === true ? chalk.green.bold(ret.toString()) : chalk.red.bold(ret.toString())}`);
+                    if(ret === true) {
+                        const _v = new element(lineValue);
+                        //variablesRegistery.add(_v);
+                        transpiledCode.add(_v.seaElement);
+                    }
+                }
+                catch(E) {
+                    console.log(chalk.bold.yellow('Failed to transpile!'));
+                    console.error(chalk.bold.red(E));
+                    process.exit(1);
                 }
             }
             console.log('---------');

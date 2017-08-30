@@ -1,27 +1,27 @@
 const pattern = require('./patternAbstract.js');
 
 // Require Str primitive from sealang !
-const { Str } = require('sealang');
+const { Int: SEAInt } = require('sealang');
 
 // String pattern to match!
-const StringPattern = new RegExp(/^String\s+([a-zA-Z]+[0-9]*)\s+=\s+'(.*)'/);
+const IntPattern = new RegExp(/^Int\s+([a-zA-Z]+[0-9]*)\s+=\s+([0-9]+)/);
 
 /*
- * @class String
+ * @class Int
  * @property {String} name
- * @property {String} value
+ * @property {Number} value
  */
-class String extends pattern {
+class Int extends pattern {
 
     /*
-     * @static String.isMatching 
+     * @static Int.isMatching 
      * @param {String} str
      */
     static isMatching(str) {
         if('string' !== typeof(str)) {
             throw new TypeError('Invalid type for str argument!');
         }
-        return StringPattern.test(str);
+        return IntPattern.test(str);
     }
 
     /*
@@ -33,13 +33,13 @@ class String extends pattern {
         if('string' !== typeof(str)) {
             throw new TypeError('Invalid type for str argument!');
         }
-        const [,varName,varValue] = StringPattern.exec(str);
+        const [,varName,varValue] = IntPattern.exec(str);
         this.name = varName;
-        this.value = varValue;
-        this.element = new Str(varName,varValue);
+        this.value = parseInt(varValue);
+        this.element = new SEAInt(varName,varValue);
     }
 
 }
 
-// Export String
-module.exports = String;
+// Export Int
+module.exports = Int;

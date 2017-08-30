@@ -8,3 +8,4 @@ use stdlib::string;
 use stdlib::boolean;
 
 my $a = stdlib::string->new("hello world!");
+my $b = stdlib::integer->new(5);
