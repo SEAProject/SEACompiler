@@ -62,7 +62,8 @@ class Compiler extends events {
             isModule: false
         });
         transpiledCode.breakline();
-        const variablesRegistery = new Set();
+        const variablesRegistery = new Map();
+        const varAssign = new RegExp(/^([a-zA-Z]+[0-9]*)\s+=\s+(.*)$/);
         
         console.log('---------');
         const lines = buf.toString().split('\n');
@@ -71,15 +72,27 @@ class Compiler extends events {
                 transpiledCode.breakline();
                 return;
             }
+            //When
+            if(varAssign.test(lineValue) === true) {
+                console.log(chalk.bold.yellow('Variable matched!!!'));
+                const [,varName,varValue] = varAssign.exec(lineValue);
+                if(variablesRegistery.has(varName) === false) {
+                    throw new Error(`Undefined variable ${varName}`);
+                }
+                const varRef = variablesRegistery.get(varName);
+                transpiledCode.add(varRef.updateValue(varValue));
+                return;
+            }
+
             console.log(chalk.bold.yellow(lineValue));
-            for(let element of this.patterns) {
+            for(let PrimitiveType of this.patterns) {
                 try {
-                    const ret = element.isMatching(lineValue);
-                    console.log(`Check ${chalk.cyan.bold(element.name)} :: ${ret === true ? chalk.green.bold(ret.toString()) : chalk.red.bold(ret.toString())}`);
+                    const ret = PrimitiveType.isMatching(lineValue);
+                    console.log(`Check ${chalk.cyan.bold(PrimitiveType.name)} :: ${ret === true ? chalk.green.bold(ret.toString()) : chalk.red.bold(ret.toString())}`);
                     if(ret === true) {
-                        const _v = new element(lineValue);
-                        //variablesRegistery.add(_v);
-                        transpiledCode.add(_v.seaElement);
+                        const Prime = new PrimitiveType(lineValue);
+                        variablesRegistery.set(Prime.name,Prime.seaElement);
+                        transpiledCode.add(Prime.seaElement);
                     }
                 }
                 catch(E) {

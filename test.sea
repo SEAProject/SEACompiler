@@ -1,2 +1,3 @@
 String a = 'hello world!'
 Int b = 5
+a = 'test';
