@@ -9,4 +9,4 @@ async function main() {
 }
 
 // Call main.
-main(); 
+main().catch( E =>  console.error(E) );

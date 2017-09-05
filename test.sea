@@ -1,3 +1,9 @@
+
 String a = 'hello world!'
+Scalar c = "hey!"
+a = 'test'
+
 Int b = 5
-a = 'test';
+b = 10
+b.add(10)
+
