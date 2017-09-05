@@ -4,6 +4,6 @@ Scalar c = "hey!"
 a = 'test'
 
 Int b = 5
-b = 10
-b.add(10)
+Int i = 1
+b.add(i)
 

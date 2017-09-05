@@ -7,10 +7,13 @@ use stdlib::integer;
 use stdlib::string;
 use stdlib::boolean;
 
+
 my $a = stdlib::string->new("hello world!");
 my $c = ""hey!"";
 $a->updateValue('test');
 
 my $b = stdlib::integer->new(5);
-$b->updateValue(10);
-$b->add(10);
+my $i = stdlib::integer->new(1);
+$b->add($i->valueOf());
+
+

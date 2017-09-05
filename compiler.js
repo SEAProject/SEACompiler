@@ -23,7 +23,9 @@ const CompilerRegex = {
     breakLine:  new RegExp(/^\s*\r*\n?$/),
     varMethod:  new RegExp(/^([a-zA-Z]+[0-9]*)\.{1}[a-zA-Z]+/),
     varAssign:  new RegExp(/^([a-zA-Z]+[0-9]*)\s+=\s+(.*)/),
-    getMethods: new RegExp(/.{1}([a-zA-Z]+)\(?(['"a-zA-Z0-9]+)?/,'gm')
+    getMethods: new RegExp(/.{1}([a-zA-Z]+[0-9]*)\(?([a-zA-Z0-9,'"$@]+)\)?/,'gm'),
+    isVar:      new RegExp(/^([a-zA-Z]+[0-9]*)$/),
+    isString:   new RegExp(/^('|")[a-zA-Z0-9\s]+('|")$/)
 };
 
 /*
@@ -92,13 +94,13 @@ class Compiler extends events {
         const element = this.variablesRegistery.get(varName);
         let result;
         while( (result = CompilerRegex.getMethods.exec(strLine) ) !== null) {
-            const args = [];
+            let args = [];
             const [,methodName,methodValue] = result;
             console.log(`methodName => ${chalk.bold.green(methodName)}`);
             console.log(`methodValue => ${chalk.bold.yellow(methodValue)}`);
 
             if('undefined' !== typeof(methodValue)) {
-                args.push(methodValue);
+                args = this.checkVarsTypes(methodValue.split(','));
             }
             code.add(new PrimeMethod({
                 name: methodName,
@@ -108,6 +110,28 @@ class Compiler extends events {
         }
         console.log('---------');
         return true;
+    }
+
+    /*
+     * @function Compiler.checkVarsTypes
+     * @param {Array} varsArray
+     * @return Void 0
+     */
+    checkVarsTypes(varsArray) {
+        if('undefined' === typeof(varsArray)) {
+            throw new TypeError('Undefined varsArray');
+        }
+        return varsArray.map( vStr => {
+            if(CompilerRegex.isVar.test(vStr) === true) {
+                const [,varName] = CompilerRegex.isVar.exec(vStr);
+                console.log(`${chalk.green.bold('checkVarsTypes')} -> var matched :: ${chalk.cyan.bold(varName)}`);
+                if(this.variablesRegistery.has(varName) === false) {
+                    return vStr;
+                }
+                return this.variablesRegistery.get(varName);
+            }
+            return vStr;
+        });
     }
 
     /*
