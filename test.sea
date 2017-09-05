@@ -1,5 +1,6 @@
 
-String a = 'hello world!'
+String a = ' hello world! '
+a.trim
 Scalar c = "hey!"
 a = 'test'
 
@@ -7,3 +8,6 @@ Int b = 5
 Int i = 1
 b.add(i)
 
+{
+    String a55 = 'in scope!'
+}

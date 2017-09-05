@@ -8,7 +8,8 @@ use stdlib::string;
 use stdlib::boolean;
 
 
-my $a = stdlib::string->new("hello world!");
+my $a = stdlib::string->new(" hello world! ");
+$a->trim();
 my $c = ""hey!"";
 $a->updateValue('test');
 

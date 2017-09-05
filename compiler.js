@@ -23,7 +23,7 @@ const CompilerRegex = {
     breakLine:  new RegExp(/^\s*\r*\n?$/),
     varMethod:  new RegExp(/^([a-zA-Z]+[0-9]*)\.{1}[a-zA-Z]+/),
     varAssign:  new RegExp(/^([a-zA-Z]+[0-9]*)\s+=\s+(.*)/),
-    getMethods: new RegExp(/.{1}([a-zA-Z]+[0-9]*)\(?([a-zA-Z0-9,'"$@]+)\)?/,'gm'),
+    getMethods: new RegExp(/.{1}([a-zA-Z]+[0-9]*)\(?([a-zA-Z0-9,'"$@]+)?\)?/,'gm'),
     isVar:      new RegExp(/^([a-zA-Z]+[0-9]*)$/),
     isString:   new RegExp(/^('|")[a-zA-Z0-9\s]+('|")$/)
 };
