@@ -8,13 +8,9 @@ use stdlib::string;
 use stdlib::boolean;
 
 
-my $a = stdlib::string->new(" hello world! ");
-$a->trim();
-my $c = ""hey!"";
-$a->updateValue('test');
-
-my $b = stdlib::integer->new(5);
-my $i = stdlib::integer->new(1);
-$b->add($i->valueOf());
-
-
+my $a = stdlib::string->new("' hello '");
+{
+  my $b = stdlib::string->new("' world '");
+  $a->trim();
+  $a->concat($b->valueOf());
+};

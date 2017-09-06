@@ -1,13 +1,6 @@
 
-String a = ' hello world! '
-a.trim
-Scalar c = "hey!"
-a = 'test'
-
-Int b = 5
-Int i = 1
-b.add(i)
-
+String a = ' hello '
 {
-    String a55 = 'in scope!'
+    String b = ' world '
+    a.trim.concat(b);
 }

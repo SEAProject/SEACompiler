@@ -4,7 +4,7 @@ const pattern = require('./patternAbstract.js');
 const { Int: SEAInt } = require('sealang');
 
 // String pattern to match!
-const IntPattern = new RegExp(/^Int\s+([a-zA-Z]+[0-9]*)\s+=\s+([0-9]+)/);
+const IntPattern = new RegExp(/^\s*\t*Int\s+([a-zA-Z]+[0-9]*)\s+=\s+([0-9]+)/);
 
 /*
  * @class Int

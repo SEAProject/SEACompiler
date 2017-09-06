@@ -36,10 +36,10 @@ class Print extends pattern {
         const [,varName,varValue] = PrintPattern.exec(str);
         this.name = varName;
         this.value = parseInt(varValue);
-        this.element = new SEAInt(varName,varValue);
+        this.element = new SEAPrint(varName,varValue);
     }
 
 }
 
 // Export Int
-module.exports = Int;
+module.exports = Print;

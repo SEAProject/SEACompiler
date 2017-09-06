@@ -4,7 +4,7 @@ const pattern = require('./patternAbstract.js');
 const { Str } = require('sealang');
 
 // String pattern to match!
-const StringPattern = new RegExp(/^String\s+([a-zA-Z]+[0-9]*)\s+=\s+'(.*)'/);
+const StringPattern = new RegExp(/^\s*\t*String\s+([a-zA-Z]+[0-9]*)\s+=\s+(.*)/);
 
 /*
  * @class String

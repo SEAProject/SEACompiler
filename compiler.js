@@ -2,7 +2,7 @@
 const events        = require('events');
 const { readFile }  = require('fs');
 const { promisify } = require('util');
-const { extname, join }   = require('path');
+const { join }   = require('path');
 const chalk = require('chalk');
 
 // SEA Lang schema API
@@ -20,17 +20,26 @@ const Patterns = [
 
 // Regex 
 const CompilerRegex = {
-    breakLine:  new RegExp(/^\s*\r*\n?$/),
-    varMethod:  new RegExp(/^([a-zA-Z]+[0-9]*)\.{1}[a-zA-Z]+/),
-    varAssign:  new RegExp(/^([a-zA-Z]+[0-9]*)\s+=\s+(.*)/),
-    getMethods: new RegExp(/.{1}([a-zA-Z]+[0-9]*)\(?([a-zA-Z0-9,'"$@]+)?\)?/,'gm'),
-    isVar:      new RegExp(/^([a-zA-Z]+[0-9]*)$/),
-    isString:   new RegExp(/^('|")[a-zA-Z0-9\s]+('|")$/)
+    breakLine:      new RegExp(/^\s*\r*\n?$/),
+    varMethod:      new RegExp(/^\s*\t*([a-zA-Z]+[0-9]*)\.{1}[a-zA-Z]+/),
+    varAssign:      new RegExp(/^\s*\t*([a-zA-Z]+[0-9]*)\s+=\s+(.*)/),
+    getMethods:     new RegExp(/.{1}([a-zA-Z]+[0-9]*)\(?([a-zA-Z0-9,'"$@]+)?\)?/,'gm'),
+    openBracket:    new RegExp(/^\s*\t*{/),
+    closeBracket:   new RegExp(/^\s*\t*}/),
+    isVar:          new RegExp(/^([a-zA-Z]+[0-9]*)$/),
+    isString:       new RegExp(/^('|")[a-zA-Z0-9\s]+('|")$/)
 };
+
+// Scope core
+const Scope = require('./core/scope.js');
 
 /*
  * @class Compiler @extend events
+ * 
  * @property {String} source
+ * @property {Set} patterns
+ * @property {Scope} scope 
+ * 
  */
 class Compiler extends events {
 
@@ -40,12 +49,12 @@ class Compiler extends events {
      */
     constructor(source) {
         super();
-        if("undefined" === typeof(source)) {
+        if('undefined' === typeof(source)) {
             throw new Error('Please defined a source destination!');
         }
         this.source = source;
         this.patterns = new Set();
-        this.variablesRegistery = new Map();
+        this.scope = new Scope();
         console.log(chalk.dim.bold('Loading all patterns...'));
         Patterns.forEach( localPath => {
             try {
@@ -54,7 +63,7 @@ class Compiler extends events {
                 this.patterns.add(classInstance);
             }
             catch(E) {
-                console.log(`Failed to load ...`);
+                console.log('Failed to load ...');
                 console.error(E);
             }
         });
@@ -62,47 +71,50 @@ class Compiler extends events {
 
     /*
      * @function Compiler.checkAssign
-     * @param {SEA.File} code 
      * @param {String} strLine
      * @return Boolean
      */
-    checkAssign(code,strLine) {
+    checkAssign(strLine) {
         if(CompilerRegex.varAssign.test(strLine) === false) return false;
         const [,varName,varValue] = CompilerRegex.varAssign.exec(strLine);
         console.log(`${chalk.dim.bold('Update variable')} detected :: ${chalk.bold.cyan(varName)} => ${chalk.bold.green(varValue)}`);
-        if(this.variablesRegistery.has(varName) === false) {
+        if(this.scope.has(varName) === false) {
             throw new Error(`Undefined variable ${varName}`);
         }
-        code.add(this.variablesRegistery.get(varName).updateValue(varValue));
+        const element = this.scope.get(varName);
+        this.scope.add(new PrimeMethod({
+            name: 'updateValue',
+            element,
+            args: this.checkVarsTypes([varValue])
+        }));
         console.log('---------');
         return true;
     }
 
     /*
      * @function Compiler.checkMethod
-     * @param {SEA.File} code 
      * @param {String} strLine
      * @return Boolean
      */
-    checkMethod(code,strLine) {
+    checkMethod(strLine) {
         if(CompilerRegex.varMethod.test(strLine) === false) return false;
         const [,varName] = CompilerRegex.varMethod.exec(strLine);
         console.log(`${chalk.dim.bold('Method call')} detected on :: ${chalk.bold.cyan(varName)}`);
-        if(this.variablesRegistery.has(varName) === false) {
+        if(this.scope.has(varName) === false) {
             throw new Error(`Undefined variable ${varName}`);
         }
-        const element = this.variablesRegistery.get(varName);
+        const element = this.scope.get(varName);
         let result;
         while( (result = CompilerRegex.getMethods.exec(strLine) ) !== null) {
             let args = [];
             const [,methodName,methodValue] = result;
-            console.log(`methodName => ${chalk.bold.green(methodName)}`);
-            console.log(`methodValue => ${chalk.bold.yellow(methodValue)}`);
+            if(methodName === varName) continue;
+            console.log(`\t[ ${chalk.bold.cyan(methodName)} -> ${chalk.bold.yellow(methodValue)} ]`);
 
             if('undefined' !== typeof(methodValue)) {
                 args = this.checkVarsTypes(methodValue.split(','));
             }
-            code.add(new PrimeMethod({
+            this.scope.add(new PrimeMethod({
                 name: methodName,
                 element,
                 args
@@ -124,11 +136,11 @@ class Compiler extends events {
         return varsArray.map( vStr => {
             if(CompilerRegex.isVar.test(vStr) === true) {
                 const [,varName] = CompilerRegex.isVar.exec(vStr);
-                console.log(`${chalk.green.bold('checkVarsTypes')} -> var matched :: ${chalk.cyan.bold(varName)}`);
-                if(this.variablesRegistery.has(varName) === false) {
-                    return vStr;
+                console.log(`\t -> ${chalk.green.bold('Variable matched')} :: ${chalk.cyan.bold(varName)}`);
+                if(this.scope.has(varName) === false) {
+                    throw new Error(`Undefined variable ${varName}`);
                 }
-                return this.variablesRegistery.get(varName);
+                return this.scope.get(varName);
             }
             return vStr;
         });
@@ -150,6 +162,7 @@ class Compiler extends events {
             isModule: false
         });
         transpiledCode.breakline();
+        this.scope.originExpr = transpiledCode;
         
         console.log('---------');
         const lines = buf.toString().split('\n');
@@ -163,9 +176,23 @@ class Compiler extends events {
                 return;
             }
 
+            // Match open bracket (scope) 
+            if(CompilerRegex.openBracket.test(lineValue) === true) {
+                console.log(chalk.dim.bold('Open bracket detected!'));
+                console.log('---------');
+                this.scope.up();
+                return;
+            }
+            else if(CompilerRegex.closeBracket.test(lineValue) === true) {
+                console.log(chalk.dim.bold('Close bracket detected!'));
+                console.log('---------');
+                this.scope.down();
+                return;
+            }
+
             // Check variable & methods assignments!
-            if(this.checkAssign(transpiledCode,lineValue) === true) return;
-            if(this.checkMethod(transpiledCode,lineValue) === true) return;
+            if(this.checkAssign(lineValue) === true) return;
+            if(this.checkMethod(lineValue) === true) return;
 
             console.log(chalk.bold.yellow(lineValue));
             for(let PrimitiveType of this.patterns) {
@@ -174,8 +201,8 @@ class Compiler extends events {
                     console.log(`Check ${chalk.cyan.bold(PrimitiveType.name)} :: ${ret === true ? chalk.green.bold(ret.toString()) : chalk.red.bold(ret.toString())}`);
                     if(ret === true) {
                         const Prime = new PrimitiveType(lineValue);
-                        this.variablesRegistery.set(Prime.name,Prime.seaElement);
-                        transpiledCode.add(Prime.seaElement);
+                        this.scope.set(Prime.name,Prime.seaElement);
+                        this.scope.add(Prime.seaElement);
                         break;
                     }
                 }
@@ -188,7 +215,7 @@ class Compiler extends events {
             console.log('---------');
         });
 
-        console.log('\n\n');
+        console.log('\n');
         console.log(chalk.cyan.bold('Generating Perl5 stdout :'));
         const stdout = await transpiledCode.write( join( __dirname, 'compiled' ) );
         console.log(chalk.dim.bold(stdout));

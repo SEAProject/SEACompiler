@@ -4,7 +4,7 @@ const pattern = require('./patternAbstract.js');
 const { Scalar: SEAScalar } = require('sealang');
 
 // String pattern to match!
-const ScalarPattern = new RegExp(/^Scalar\s+([a-zA-Z]+[0-9]*)\s+=\s+(.*)/);
+const ScalarPattern = new RegExp(/^\s*\t*Scalar\s+([a-zA-Z]+[0-9]*)\s+=\s+(.*)/);
 
 /*
  * @class Scalar
