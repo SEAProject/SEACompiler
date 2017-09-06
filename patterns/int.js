@@ -20,7 +20,7 @@ class Int {
 }
 
 Int.element = SEAInt;
-Int.pattern = new RegExp(/^\s*\t*Int\s+([a-zA-Z]+[0-9]*)\s+=\s+([0-9]+)/);
+Int.pattern = new RegExp(/^\s*\t*Int\s+([a-zA-Z]+[0-9]*)\s+=\s+([a-zA-Z]+[0-9]+)/);
 
 // Export Int
 module.exports = Int;
