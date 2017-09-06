@@ -8,10 +8,5 @@ use stdlib::string;
 use stdlib::boolean;
 
 
-my $a = stdlib::string->new("' hello '");
-{
-  my $b = stdlib::string->new("' world '");
-  $a->trim();
-  $a->concat($b->valueOf());
-};
-my $a = $a->valueOf();
+my $a1 = stdlib::integer->new(5);
+my $a2 = stdlib::integer->new(10);

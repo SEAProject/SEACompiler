@@ -21,7 +21,7 @@
   },
   "homepage": "https://github.com/SEAProject/SEACompiler#readme",
   "dependencies": {
-    "sealang": "^1.0.3"
+    "sealang": "^1.0.4"
   },
   "devDependencies": {
     "chalk": "^2.1.0"

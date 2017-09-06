@@ -1,7 +1,4 @@
 
-String a = ' hello '
-{
-    String b = ' world '
-    a.trim.concat(b);
-}
-String c = a
+Int a1 = 5
+Int a2 = 10 
+Int b1 = a1 + a2

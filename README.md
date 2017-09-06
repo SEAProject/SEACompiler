@@ -3,6 +3,7 @@ SEALang compiler
 
 # Roadmap
 
-- Scope implementation
+- [x] Scope implementation
+- Arithmetic operations
 - Print implementation
 - Arguments type guard
