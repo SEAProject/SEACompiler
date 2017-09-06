@@ -1,12 +1,10 @@
-const pattern = require('./patternAbstract.js');
-
 // Require Str primitive from sealang !
 const { Str } = require('sealang');
 
 /*
  * @class String
  */
-class String extends pattern {
+class String {
 
     /*
      * @static String.isMatching 
