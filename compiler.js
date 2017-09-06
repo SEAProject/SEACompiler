@@ -6,7 +6,7 @@ const { join }   = require('path');
 const chalk = require('chalk');
 
 // SEA Lang schema API
-const {File,PrimeMethod} = require('sealang');
+const {File,PrimeMethod,Dependency} = require('sealang');
 
 // Async Node core method!
 const readFileAsynchronous = promisify(readFile);
@@ -20,6 +20,7 @@ const Patterns = [
 
 // Regex 
 const CompilerRegex = {
+    import:         new RegExp(/^\s*\t*import\s{?([*a-zA-Z0-9\s,]+)}?\sfrom\s([a-zA-Z0-9.]+)\n?/),
     breakLine:      new RegExp(/^\s*\r*\n?$/),
     varMethod:      new RegExp(/^\s*\t*([a-zA-Z]+[0-9]*)\.{1}[a-zA-Z]+/),
     varAssign:      new RegExp(/^\s*\t*([a-zA-Z]+[0-9]*)\s+=\s+(.*)/),
@@ -194,6 +195,20 @@ class Compiler extends events {
                 console.log(chalk.dim.bold('Breakline detected!'));
                 console.log('---------');
                 transpiledCode.breakline();
+                return;
+            }
+
+            // Match dependency
+            if(CompilerRegex.import.test(lineValue) === true) {
+                const [,argStr,pkgName] = CompilerRegex.import.exec(lineValue);
+                console.log(`Dependency matched :: ${chalk.green.bold(pkgName)}`);
+                console.log('---------');
+                if(argStr === '*') {
+                    transpiledCode.add( new Dependency(pkgName,void 0) );
+                }
+                else {
+                    transpiledCode.add( new Dependency(pkgName,argStr.split(',').map( v => v.trim() )) );
+                }
                 return;
             }
 
