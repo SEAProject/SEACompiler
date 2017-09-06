@@ -3,13 +3,8 @@ const pattern = require('./patternAbstract.js');
 // Require Str primitive from sealang !
 const { Str } = require('sealang');
 
-// String pattern to match!
-const StringPattern = new RegExp(/^\s*\t*String\s+([a-zA-Z]+[0-9]*)\s+=\s+(.*)/);
-
 /*
  * @class String
- * @property {String} name
- * @property {String} value
  */
 class String extends pattern {
 
@@ -21,25 +16,13 @@ class String extends pattern {
         if('string' !== typeof(str)) {
             throw new TypeError('Invalid type for str argument!');
         }
-        return StringPattern.test(str);
-    }
-
-    /*
-     * @constructor 
-     * @param {String} str
-     */
-    constructor(str) {
-        super();
-        if('string' !== typeof(str)) {
-            throw new TypeError('Invalid type for str argument!');
-        }
-        const [,varName,varValue] = StringPattern.exec(str);
-        this.name = varName;
-        this.value = varValue;
-        this.element = new Str(varName,varValue);
+        return String.pattern.test(str);
     }
 
 }
+
+String.element = Str;
+String.pattern = new RegExp(/^\s*\t*String\s+([a-zA-Z]+[0-9]*)\s+=\s+(.*)/);
 
 // Export String
 module.exports = String;

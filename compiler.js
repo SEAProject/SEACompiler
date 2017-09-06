@@ -125,6 +125,27 @@ class Compiler extends events {
     }
 
     /*
+     * @function Compiler.checkBrackets
+     * @param {String} strLine
+     * @return Boolean
+     */
+    checkBrackets(strLine) {
+        if(CompilerRegex.openBracket.test(strLine) === true) {
+            console.log(chalk.dim.bold('Open bracket detected!'));
+            console.log('---------');
+            this.scope.up();
+            return true;
+        }
+        else if(CompilerRegex.closeBracket.test(strLine) === true) {
+            console.log(chalk.dim.bold('Close bracket detected!'));
+            console.log('---------');
+            this.scope.down();
+            return true;
+        }
+        return false;
+    }
+
+    /*
      * @function Compiler.checkVarsTypes
      * @param {Array} varsArray
      * @return Void 0
@@ -176,21 +197,7 @@ class Compiler extends events {
                 return;
             }
 
-            // Match open bracket (scope) 
-            if(CompilerRegex.openBracket.test(lineValue) === true) {
-                console.log(chalk.dim.bold('Open bracket detected!'));
-                console.log('---------');
-                this.scope.up();
-                return;
-            }
-            else if(CompilerRegex.closeBracket.test(lineValue) === true) {
-                console.log(chalk.dim.bold('Close bracket detected!'));
-                console.log('---------');
-                this.scope.down();
-                return;
-            }
-
-            // Check variable & methods assignments!
+            if(this.checkBrackets(lineValue) === true) return;
             if(this.checkAssign(lineValue) === true) return;
             if(this.checkMethod(lineValue) === true) return;
 
@@ -200,9 +207,12 @@ class Compiler extends events {
                     const ret = PrimitiveType.isMatching(lineValue);
                     console.log(`Check ${chalk.cyan.bold(PrimitiveType.name)} :: ${ret === true ? chalk.green.bold(ret.toString()) : chalk.red.bold(ret.toString())}`);
                     if(ret === true) {
-                        const Prime = new PrimitiveType(lineValue);
-                        this.scope.set(Prime.name,Prime.seaElement);
-                        this.scope.add(Prime.seaElement);
+                        const [,varName,varValue] = PrimitiveType.pattern.exec(lineValue);
+                        console.log(`var ${chalk.green.bold(varName)} -> ${varValue}`);
+                        const arg = this.checkVarsTypes([varValue]);
+                        const seaElement = new PrimitiveType.element(varName,arg.shift());
+                        this.scope.set(varName,seaElement);
+                        this.scope.add(seaElement);
                         break;
                     }
                 }

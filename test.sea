@@ -4,3 +4,4 @@ String a = ' hello '
     String b = ' world '
     a.trim.concat(b);
 }
+String c = a

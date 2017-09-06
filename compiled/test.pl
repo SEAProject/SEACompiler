@@ -14,3 +14,4 @@ my $a = stdlib::string->new("' hello '");
   $a->trim();
   $a->concat($b->valueOf());
 };
+my $a = $a->valueOf();
