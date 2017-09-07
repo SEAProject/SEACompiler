@@ -15,7 +15,8 @@ const readFileAsynchronous = promisify(readFile);
 const Patterns = [
     join ( __dirname , 'patterns/string.js' ),
     join ( __dirname , 'patterns/int.js' ),
-    join ( __dirname , 'patterns/scalar.js' )
+    join ( __dirname , 'patterns/scalar.js' ),
+    join ( __dirname , 'patterns/array.js' )
 ];
 
 // Regex 
@@ -56,6 +57,7 @@ class Compiler extends events {
         this.source = source;
         this.patterns = new Set();
         this.scope = new Scope();
+        this.chainPattern = false;
         console.log(chalk.dim.bold('Loading all patterns...'));
         Patterns.forEach( localPath => {
             try {
@@ -169,6 +171,29 @@ class Compiler extends events {
     }
 
     /*
+     * @function Compiler.checkPattern
+     */
+    checkPattern(primitive,strLine) {
+        if(primitive.name === 'Array') {
+            const [,typeName,arrayName] = primitive.pattern.exec(strLine);
+            console.log(`array ${chalk.green.bold(arrayName)} typeof ${typeName}`);
+            // Check for values!
+            // const arg = this.checkVarsTypes([varValue]);
+            // const seaElement = new primitive.element(varName,arg.shift());
+            // this.scope.set(varName,seaElement);
+            // this.scope.add(seaElement);
+        }
+        else {
+            const [,varName,varValue] = primitive.pattern.exec(strLine);
+            console.log(`var ${chalk.green.bold(varName)} -> ${varValue}`);
+            const arg = this.checkVarsTypes([varValue]);
+            const seaElement = new primitive.element(varName,arg.shift());
+            this.scope.set(varName,seaElement);
+            this.scope.add(seaElement);
+        }
+    }
+
+    /*
      * @function Compiler.transpile
      * @param {String} fileSourceName
      * @return Promise<void 0>
@@ -189,6 +214,12 @@ class Compiler extends events {
         console.log('---------');
         const lines = buf.toString().split('\n');
         lines.forEach( (lineValue) => {
+
+            // If we seek for multiline-pattern :
+            if(this.chainPattern === true) {
+
+                return;
+            }
 
             // Check for linebreak!
             if(CompilerRegex.breakLine.test(lineValue) === true) {
@@ -222,12 +253,7 @@ class Compiler extends events {
                     const ret = PrimitiveType.isMatching(lineValue);
                     console.log(`Check ${chalk.cyan.bold(PrimitiveType.name)} :: ${ret === true ? chalk.green.bold(ret.toString()) : chalk.red.bold(ret.toString())}`);
                     if(ret === true) {
-                        const [,varName,varValue] = PrimitiveType.pattern.exec(lineValue);
-                        console.log(`var ${chalk.green.bold(varName)} -> ${varValue}`);
-                        const arg = this.checkVarsTypes([varValue]);
-                        const seaElement = new PrimitiveType.element(varName,arg.shift());
-                        this.scope.set(varName,seaElement);
-                        this.scope.add(seaElement);
+                        this.checkPattern(PrimitiveType,lineValue);
                         break;
                     }
                 }
