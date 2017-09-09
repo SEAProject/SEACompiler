@@ -1,8 +1,4 @@
+import {f1,f2} from Lib.core
 
-Int a1 = 5
-Int a2 = 10 
-Int b1 = a1 + a2
-
-Function echo(String arg1) {
-
-}
+Int a = 5
+Array<Int> test (5,10,15)

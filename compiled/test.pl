@@ -1,3 +1,4 @@
+use Lib::core qw(f1 f2);
 use strict;
 use warnings;
 use stdlib::util;
@@ -8,5 +9,4 @@ use stdlib::string;
 use stdlib::boolean;
 
 
-my $a1 = stdlib::integer->new(5);
-my $a2 = stdlib::integer->new(10);
+my $a = stdlib::integer->new(5);
